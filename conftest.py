@@ -6,7 +6,6 @@ from selenium.webdriver import Remote
 from selenium.webdriver.chrome.options import Options as CH_Options
 from selenium.webdriver.firefox.options import Options as FF_Options
 from config import RunConfig
-
 # 项目目录配置
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPORT_DIR = BASE_DIR + "/test_report/"
@@ -44,14 +43,22 @@ def pytest_runtest_makereport(item):
     extra = getattr(report, 'extra', [])
     if report.when == 'call' or report.when == "setup":
         xfail = hasattr(report, 'wasxfail')
+        #如果失败时截图
         if (report.skipped and xfail) or (report.failed and not xfail):
+            #临时的错误截图路径：类似 test_dir/test_baidu.py_TestSearch_test_baidu_search_case.png
             case_path = report.nodeid.replace("::", "_") + ".png"
+            #print("case_path截图路径：",case_path)
+            #个人觉得下面这个判断没必要，因为这个case_name最后在截图函数里又重新赋值了
             if "[" in case_path:
                 case_name = case_path.split("-")[0] + "].png"
             else:
                 case_name = case_path
+            #print("case_name截图路径：", case_name)
+            #将截图路径传入截图函数里,类似 test_dir/test_baidu.py_TestSearch_test_baidu_search_case.png
             capture_screenshots(case_name)
+            #截图的路径，截图所在的image文件夹跟report.html在同一个目录下
             img_path = "image/" + case_name.split("/")[-1]
+            #print("img_path截图路径：", img_path)
             if img_path:
                 html = '<div><img src="%s" alt="screenshot" style="width:304px;height:228px;" ' \
                        'onclick="window.open(this.src)" align="right"/></div>' % img_path
@@ -92,12 +99,17 @@ def capture_screenshots(case_name):
     :return:
     """
     global driver
+    #fie_name =test_baidu.py_TestSearch_test_baidu_search_case.png
     file_name = case_name.split("/")[-1]
+    print("file_name：",file_name)
     new_report_dir = new_report_time()
     if new_report_dir is None:
         raise RuntimeError('没有初始化测试目录')
+    #D:\pyautoTest\pyautoTest/test_report/2020_06_01_23_38_44\image\test_baidu.py_TestSearch_test_baidu_search_case.png
     image_dir = os.path.join(REPORT_DIR, new_report_dir, "image", file_name)
+    print("修改后的图片路径:",image_dir)
     driver.save_screenshot(image_dir)
+    #driver.get_screenshot_as_file(case_name)
 
 
 def new_report_time():
@@ -123,7 +135,7 @@ def browser():
 
     if RunConfig.driver_type == "chrome":
         # 本地chrome浏览器
-        driver = webdriver.Chrome()
+        driver = webdriver.Chrome(executable_path="chromedriver.exe")
         driver.maximize_window()
 
     elif RunConfig.driver_type == "firefox":
@@ -162,6 +174,7 @@ def browser():
 # 关闭浏览器
 @pytest.fixture(scope="session", autouse=True)
 def browser_close():
+    #设置成生成器函数
     yield driver
     driver.quit()
     print("test end!")

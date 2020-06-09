@@ -7,10 +7,9 @@ import sys
 from time import sleep
 import pytest
 from os.path import dirname, abspath
-
+#将当前项目路径pyautoTest临时加入python搜索路径，退出程序时失效
 sys.path.insert(0, dirname(dirname(abspath(__file__))))
 from page.baidu_page import BaiduPage
-
 
 class TestSearch:
     """百度搜索"""
@@ -31,6 +30,23 @@ class TestSearch:
         page.search_button.click()
         sleep(2)
         assert browser.title == "pytest_百度搜索"
+    def test_baidu_search_case2(self, browser, base_url):
+        """
+        名称：百度搜索"geek"
+        步骤：
+        1、打开浏览器
+        2、输入"pytest"关键字
+        3、点击搜索按钮
+        检查点：
+        * 检查页面标题是否包含关键字。
+        """
+        page = BaiduPage(browser)
+        page.get(base_url)
+        page.search_input = "geek"
+        page.search_button.click()
+        sleep(2)
+        assert browser.title == "geek_百度搜索"
+
 
 
 class TestSearchSettings:
@@ -54,13 +70,15 @@ class TestSearchSettings:
         page.search_setting.click()
         sleep(2)
         page.save_setting.click()
+        sleep(2)
         alert_text = page.get_alert_text
         page.accept_alert()
         assert alert_text == "已经记录下您的使用偏好"
 
 
 if __name__ == '__main__':
-    pytest.main(["-v", "-s", "test_baidu.py"])
+    pytest.main(["-vs", "test_baidu.py"])
     # pytest.main(["-v", "-s", "test_baidu.py::TestSearch::test_baidu_search_case"])
     # pytest.main(["-v", "-s", "test_baidu.py::TestSearch"])
     # pytest.main(["-v", "-s", "test_baidu.py::TestSearchSettings"])
+

@@ -23,9 +23,9 @@ def init_env(now_time):
     """
     初始化测试报告目录
     """
-    os.mkdir(REPORT_DIR + now_time)
-    os.mkdir(REPORT_DIR + now_time + "/image")
-
+    # os.mkdir(REPORT_DIR + now_time)
+    # os.mkdir(REPORT_DIR + now_time + "/image")
+    os.makedirs(REPORT_DIR+now_time+'/image')
 
 @click.command()
 @click.option('-m', default=None, help='输入运行模式：run 或 debug.')
@@ -35,11 +35,8 @@ def run(m):
         now_time = time.strftime("%Y_%m_%d_%H_%M_%S")
         init_env(now_time)
         html_report = os.path.join(REPORT_DIR, now_time, "report.html")
-        xml_report = os.path.join(REPORT_DIR, now_time, "junit-xml.xml")
         pytest.main(["-s", "-v", RunConfig.cases_path,
                      "--html=" + html_report,
-                     "--junit-xml=" + xml_report,
-                     "--self-contained-html",
                      "--maxfail", RunConfig.max_fail,
                      "--reruns", RunConfig.rerun])
         logger.info("运行结束，生成测试报告♥❤！")
