@@ -35,8 +35,10 @@ def run(m):
         now_time = time.strftime("%Y_%m_%d_%H_%M_%S")
         init_env(now_time)
         html_report = os.path.join(REPORT_DIR, now_time, "report.html")
+        xml_report = os.path.join(REPORT_DIR, now_time, "xml_report.xml")
         pytest.main(["-s", "-v", RunConfig.cases_path,
                      "--html=" + html_report,
+                     "--junit-xml="+xml_report,
                      "--maxfail", RunConfig.max_fail,
                      "--reruns", RunConfig.rerun])
         logger.info("运行结束，生成测试报告❤❤！")
